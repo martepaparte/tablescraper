@@ -1,16 +1,21 @@
-# This is a sample Python script.
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    url = 'https://www.sodra.lt/lt/senatves-pensijos-amziaus-lentele'
+    page = requests.get(url)
+    page_info = BeautifulSoup(page.text, 'lxml')
+    table1 = page_info.find('table')
+    headers = []
+    for i in table1.find_all('tr')[1:2]:
+        row_data = i.find_all('td')
+        title = [j.text for j in row_data]
+        headers.append(title)
+    mydata = pd.DataFrame(columns=headers)
+    for j in table1.find_all('tr')[2:]:
+        row_data = j.find_all('td')
+        row = [i.text for i in row_data]
+        length = len(mydata)
+        mydata.loc[length] = row
+    mydata.to_csv('test2.csv', index=False)
